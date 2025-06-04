@@ -1,15 +1,15 @@
-# Simple workflow for deploying to GitHub Pages
-name: Deploy to GitHub Pages
+# unified build and deploy workflow
+name: Build and Deploy
 
 on:
   push:
     branches: ["main"]
-  # Allows you to run this workflow manually from the Actions tab
+  pull_request:
   workflow_dispatch:
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -17,8 +17,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
       - name: Install dependencies
-        run: npm install
+        run: npm ci
       - name: Configure vite
         run: |
           echo 'export default {
@@ -26,11 +31,15 @@ jobs:
           }' > vite.config.js
       - name: Build project
         run: npm run build
-      - name: Upload pages artifact
+      - name: Upload build artifacts
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+
   deploy:
+    # only deploy to main branch
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: build
     permissions:
       pages: write    # to deploy to Pages
