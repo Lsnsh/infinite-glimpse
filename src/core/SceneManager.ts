@@ -1,17 +1,24 @@
 import * as THREE from 'three';
 import { BaseScene } from './BaseScene';
+import { CameraController } from './CameraController';
+import { SceneConfig } from '../types/scene';
 
 export class SceneManager {
     private renderer: THREE.WebGLRenderer;
     private scenes: Map<string, BaseScene> = new Map();
+    private sceneConfigs: Map<string, SceneConfig> = new Map();
     private activeScene: BaseScene | null = null;
+    private activeSceneId: string | null = null;
     private camera!: THREE.PerspectiveCamera;
+    private cameraController!: CameraController;
     private clock: THREE.Clock;
+    private homeTime = 0;
 
     constructor(renderer: THREE.WebGLRenderer) {
         this.renderer = renderer;
         this.clock = new THREE.Clock();
         this.initCamera();
+        this.cameraController = new CameraController(this.camera);
     }
 
     private initCamera() {
@@ -24,29 +31,66 @@ export class SceneManager {
         this.camera.position.set(0, 0, 5);
     }
 
-    addScene(name: string, scene: BaseScene) {
-        this.scenes.set(name, scene);
+    addScene(id: string, scene: BaseScene, config: SceneConfig) {
+        this.scenes.set(id, scene);
+        this.sceneConfigs.set(id, config);
         scene.setCamera(this.camera);
     }
 
-    setActiveScene(name: string | null) {
-        if (name === null) {
+    setActiveScene(id: string | null) {
+        // 停止当前相机运动
+        this.cameraController.stopMovement();
+        
+        if (id === null) {
             this.activeScene = null;
+            this.activeSceneId = null;
+            this.homeTime = 0; // 重置主页时间
             return;
         }
 
-        const scene = this.scenes.get(name);
-        if (scene) {
+        const scene = this.scenes.get(id);
+        const config = this.sceneConfigs.get(id);
+        
+        if (scene && config) {
+            // 停用当前场景
+            if (this.activeScene) {
+                this.activeScene.onDeactivate();
+            }
+            
+            // 激活新场景
             this.activeScene = scene;
+            this.activeSceneId = id;
             scene.onActivate();
+            
+            // 启动相机运动
+            this.cameraController.startMovement(config);
         }
+    }
+
+    getCurrentSceneConfig(): SceneConfig | null {
+        if (!this.activeSceneId) return null;
+        return this.sceneConfigs.get(this.activeSceneId) || null;
+    }
+
+    getSceneIds(): string[] {
+        return Array.from(this.scenes.keys());
     }
 
     update() {
         const deltaTime = this.clock.getDelta();
         
         if (this.activeScene) {
+            // 更新相机控制器
+            this.cameraController.update(deltaTime);
             this.activeScene.update(deltaTime);
+        } else {
+            // 主页相机动画
+            this.homeTime += deltaTime;
+            const angle = this.homeTime * 0.2;
+            this.camera.position.x = Math.sin(angle) * 3;
+            this.camera.position.z = Math.cos(angle) * 3 + 2;
+            this.camera.position.y = Math.sin(angle * 0.5) * 1;
+            this.camera.lookAt(0, 0, 0);
         }
     }
 

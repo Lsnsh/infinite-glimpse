@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BaseScene } from '../core/BaseScene';
+import { BaseScene } from '../../core/BaseScene';
 
 export class WaterfallScene extends BaseScene {
     private waterfallMesh!: THREE.Mesh;

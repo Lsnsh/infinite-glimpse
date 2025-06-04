@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { SceneManager } from './core/SceneManager';
-import { WaterfallScene } from './scenes/WaterfallScene';
+import { getSceneConfigs, createScene } from './scenes/SceneRegistry';
 import { UI } from './ui/UI';
 
 class InfiniteGlimpse {
@@ -9,8 +9,8 @@ class InfiniteGlimpse {
     private sceneManager!: SceneManager;
     private ui!: UI;
     private isInitialized = false;
-    private cameraAutoMove = true;
-    private cameraMoveTween?: gsap.core.Tween;
+    private currentSceneIndex = 0;
+    private sceneIds: string[] = [];
 
     constructor() {
         this.init();
@@ -53,25 +53,42 @@ class InfiniteGlimpse {
         this.renderer = new THREE.WebGLRenderer({
             canvas,
             antialias: true,
-            alpha: true
+            alpha: true,
+            powerPreference: "high-performance"
         });
         
         this.renderer.setSize(container!.clientWidth, container!.clientHeight);
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        this.renderer.toneMappingExposure = 1.2;
+        this.renderer.toneMappingExposure = 1.5;
         
         // 启用阴影
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
+        // 优化透明物体渲染
+        this.renderer.sortObjects = true;
     }
 
     private async addScenes() {
-        // 添加瀑布场景
-        const waterfallScene = new WaterfallScene();
-        await waterfallScene.init();
-        this.sceneManager.addScene('waterfall', waterfallScene);
+        // 获取所有场景配置
+        const configs = getSceneConfigs();
+        this.sceneIds = configs.map(config => config.id);
+        
+        console.log('场景ID列表:', this.sceneIds);
+        
+        // 创建并添加场景
+        for (const config of configs) {
+            console.log(`正在加载场景: ${config.name} (ID: ${config.id})`);
+            const scene = await createScene(config.id);
+            if (scene) {
+                this.sceneManager.addScene(config.id, scene, config);
+                console.log(`场景加载完成: ${config.name}`);
+            } else {
+                console.error(`场景创建失败: ${config.id}`);
+            }
+        }
     }
 
     private setupEventListeners() {
@@ -105,8 +122,7 @@ class InfiniteGlimpse {
 
     private startExperience() {
         this.ui.showSceneControls();
-        this.sceneManager.setActiveScene('waterfall');
-        this.startCameraAutoMovement();
+        this.activateCurrentScene();
         
         // 平滑过渡到第一个场景
         gsap.to(document.getElementById('home-screen'), {
@@ -119,14 +135,49 @@ class InfiniteGlimpse {
     }
 
     private changeScene(direction: 'next' | 'prev') {
-        // 这里可以实现场景切换逻辑
-        console.log('切换场景:', direction);
+        if (direction === 'next') {
+            this.currentSceneIndex = (this.currentSceneIndex + 1) % this.sceneIds.length;
+        } else {
+            this.currentSceneIndex = (this.currentSceneIndex - 1 + this.sceneIds.length) % this.sceneIds.length;
+        }
+        
+        // 添加场景切换动画
+        const camera = this.sceneManager.getCamera();
+        const currentPos = camera.position.clone();
+        
+        // 短暂的过渡效果
+        gsap.to(camera.position, {
+            z: currentPos.z + 5,
+            duration: 0.3,
+            onComplete: () => {
+                // 切换场景并更新UI
+                this.activateCurrentScene();
+                
+                // 恢复相机位置会在相机控制器中处理
+            }
+        });
+        
+        console.log('切换到场景:', this.sceneIds[this.currentSceneIndex]);
+    }
+
+    private activateCurrentScene() {
+        const sceneId = this.sceneIds[this.currentSceneIndex];
+        console.log(`激活场景: ${sceneId} (索引: ${this.currentSceneIndex})`);
+        this.sceneManager.setActiveScene(sceneId);
+        
+        // 更新UI文案
+        const config = this.sceneManager.getCurrentSceneConfig();
+        if (config) {
+            console.log(`场景配置: ${config.name}`);
+            this.ui.updateSceneInfo(config.name, config.description);
+        } else {
+            console.error('无法获取场景配置');
+        }
     }
 
     private backToHome() {
         this.ui.showHomeScreen();
         this.sceneManager.setActiveScene(null);
-        this.stopCameraAutoMovement();
         
         const homeScreen = document.getElementById('home-screen')!;
         homeScreen.style.display = 'block';
@@ -134,44 +185,6 @@ class InfiniteGlimpse {
             { opacity: 0 },
             { opacity: 1, duration: 1 }
         );
-    }
-
-    private startCameraAutoMovement() {
-        if (!this.cameraAutoMove) return;
-        
-        const camera = this.sceneManager.getCamera();
-        
-        // 设置初始位置
-        camera.position.set(0, 2, 8);
-        camera.lookAt(0, 0, 0);
-        
-        // 创建一个简单的环绕运动动画
-        const radius = 8;
-        let angle = 0;
-        
-        const animateCamera = () => {
-            if (!this.cameraAutoMove) return;
-            
-            angle += 0.005; // 控制旋转速度
-            
-            // 计算新位置
-            camera.position.x = Math.sin(angle) * radius;
-            camera.position.z = Math.cos(angle) * radius;
-            camera.position.y = 2 + Math.sin(angle * 0.5) * 1; // 添加一些垂直运动
-            
-            // 让摄像机始终看向场景中心
-            camera.lookAt(0, 0, 0);
-            
-            requestAnimationFrame(animateCamera);
-        };
-        
-        animateCamera();
-    }
-
-    private stopCameraAutoMovement() {
-        if (this.cameraMoveTween) {
-            this.cameraMoveTween.kill();
-        }
     }
 
     private hideLoadingScreen() {

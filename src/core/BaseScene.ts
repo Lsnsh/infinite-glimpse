@@ -28,7 +28,7 @@ export abstract class BaseScene {
         // 场景停用时的回调
     }
 
-    onResize(width: number, height: number) {
+    onResize(_width: number, _height: number) {
         // 窗口大小改变时的回调
     }
 

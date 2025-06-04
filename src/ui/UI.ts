@@ -1,10 +1,10 @@
 export class UI {
-    private startBtn: HTMLButtonElement;
-    private homeScreen: HTMLElement;
-    private sceneControls: HTMLElement;
-    private prevBtn: HTMLButtonElement;
-    private nextBtn: HTMLButtonElement;
-    private homeBtn: HTMLButtonElement;
+    private startBtn!: HTMLButtonElement;
+    private homeScreen!: HTMLElement;
+    private sceneControls!: HTMLElement;
+    private prevBtn!: HTMLButtonElement;
+    private nextBtn!: HTMLButtonElement;
+    private homeBtn!: HTMLButtonElement;
 
     private onStartCallback?: () => void;
     private onSceneChangeCallback?: (direction: 'next' | 'prev') => void;
