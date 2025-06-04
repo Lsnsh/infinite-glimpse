@@ -1,13 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/threejs-icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Three.js + TypeScript + Vite</title>
+    <title>无限掠影 - Infinite Glimpse</title>
+    <link rel="stylesheet" href="./src/styles/main.css">
   </head>
   <body>
-    <canvas id="scene"></canvas>
-    <script type="module" src="/src/scene.ts"></script>
+    <div id="app">
+      <!-- Three.js 渲染容器 -->
+      <div id="canvas-container" class="canvas-container">
+        <canvas id="main-canvas"></canvas>
+      </div>
+      
+      <!-- 汽车窗口框架 -->
+      <div class="car-window-frame">
+        <div class="window-top"></div>
+        <div class="window-left"></div>
+        <div class="window-right"></div>
+        <div class="window-bottom"></div>
+        <div class="dashboard"></div>
+        <div class="rearview-mirror"></div>
+      </div>
+      
+      <!-- 用户界面覆盖层 -->
+      <div class="ui-overlay">
+        <div class="home-screen" id="home-screen">
+          <h1 class="title">无限掠影</h1>
+          <p class="subtitle">Infinite Glimpse</p>
+          <p class="description">透过车窗探索无限的奇妙风景</p>
+          <button class="start-btn" id="start-btn">开始旅程</button>
+        </div>
+        
+        <div class="scene-controls" id="scene-controls" style="display: none;">
+          <div class="scene-info">
+            <h3 id="scene-title">梦幻瀑布</h3>
+            <p id="scene-description">流动的光影与色彩交织</p>
+          </div>
+          <div class="control-buttons">
+            <button class="control-btn" id="prev-scene">上一个</button>
+            <button class="control-btn" id="next-scene">下一个</button>
+            <button class="control-btn" id="home-btn">返回主页</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 加载界面 -->
+      <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>正在加载美丽的风景...</p>
+      </div>
+    </div>
+    
+    <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

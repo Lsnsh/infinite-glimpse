@@ -1,0 +1,349 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+    color: white;
+    overflow: hidden;
+    height: 100vh;
+}
+
+#app {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+/* 画布容器 - 全屏 */
+.canvas-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+#main-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* 汽车窗口框架 */
+.car-window-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.window-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 15vh;
+    background: linear-gradient(to bottom, 
+        rgba(20, 20, 20, 0.95) 0%,
+        rgba(20, 20, 20, 0.8) 70%,
+        rgba(20, 20, 20, 0.3) 100%
+    );
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+}
+
+.window-left {
+    position: absolute;
+    top: 15vh;
+    left: 0;
+    width: 8vw;
+    bottom: 20vh;
+    background: linear-gradient(to right,
+        rgba(15, 15, 15, 0.95) 0%,
+        rgba(15, 15, 15, 0.7) 70%,
+        rgba(15, 15, 15, 0.2) 100%
+    );
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.4);
+}
+
+.window-right {
+    position: absolute;
+    top: 15vh;
+    right: 0;
+    width: 8vw;
+    bottom: 20vh;
+    background: linear-gradient(to left,
+        rgba(15, 15, 15, 0.95) 0%,
+        rgba(15, 15, 15, 0.7) 70%,
+        rgba(15, 15, 15, 0.2) 100%
+    );
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.4);
+}
+
+.window-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20vh;
+    background: linear-gradient(to top,
+        rgba(25, 25, 25, 0.98) 0%,
+        rgba(25, 25, 25, 0.9) 50%,
+        rgba(25, 25, 25, 0.4) 100%
+    );
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.6);
+}
+
+.dashboard {
+    position: absolute;
+    bottom: 0;
+    left: 15%;
+    right: 15%;
+    height: 12vh;
+    background: linear-gradient(to top,
+        rgba(30, 30, 30, 0.95) 0%,
+        rgba(40, 40, 40, 0.8) 50%,
+        rgba(35, 35, 35, 0.6) 100%
+    );
+    border-radius: 20px 20px 0 0;
+    box-shadow: 
+        0 -3px 15px rgba(0, 0, 0, 0.5),
+        inset 0 2px 5px rgba(255, 255, 255, 0.1);
+}
+
+.dashboard::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 20%;
+    right: 20%;
+    height: 8px;
+    background: linear-gradient(90deg,
+        rgba(0, 150, 255, 0.3) 0%,
+        rgba(0, 255, 150, 0.3) 30%,
+        rgba(255, 100, 0, 0.3) 60%,
+        rgba(255, 0, 100, 0.3) 100%
+    );
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(0, 150, 255, 0.2);
+}
+
+.rearview-mirror {
+    position: absolute;
+    top: 5vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 60px;
+    background: linear-gradient(135deg,
+        rgba(20, 20, 20, 0.9) 0%,
+        rgba(40, 40, 40, 0.8) 100%
+    );
+    border-radius: 30px;
+    border: 2px solid rgba(60, 60, 60, 0.8);
+    box-shadow: 
+        0 3px 10px rgba(0, 0, 0, 0.5),
+        inset 0 1px 3px rgba(255, 255, 255, 0.1);
+}
+
+.rearview-mirror::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 40px;
+    background: rgba(10, 30, 60, 0.3);
+    border-radius: 20px;
+    border: 1px solid rgba(100, 150, 200, 0.2);
+}
+
+/* UI覆盖层 */
+.ui-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.ui-overlay > * {
+    pointer-events: auto;
+}
+
+/* 主页屏幕 */
+.home-screen {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 20;
+}
+
+.title {
+    font-size: 4rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, #4facfe 0%, #00f2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(79, 172, 254, 0.3);
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1rem;
+    font-weight: 200;
+}
+
+.description {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 3rem;
+    max-width: 400px;
+}
+
+.start-btn {
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 16px 32px;
+    border-radius: 50px;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+}
+
+/* 场景控制 */
+.scene-controls {
+    position: absolute;
+    bottom: 25vh;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    text-align: center;
+    min-width: 300px;
+}
+
+.scene-info h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #4facfe;
+}
+
+.scene-info p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1rem;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.control-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+/* 加载屏幕 */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(79, 172, 254, 0.3);
+    border-radius: 50%;
+    border-top-color: #4facfe;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-screen p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .title {
+        font-size: 2.5rem;
+    }
+    
+    .scene-controls {
+        min-width: 250px;
+        padding: 15px;
+        bottom: 22vh;
+    }
+    
+    .control-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .window-left, .window-right {
+        width: 5vw;
+    }
+    
+    .window-top {
+        height: 12vh;
+    }
+    
+    .window-bottom {
+        height: 18vh;
+    }
+} 

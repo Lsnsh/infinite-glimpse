@@ -1,21 +1,23 @@
 {
-  "name": "threejs-starter-vite",
+  "name": "infinite-glimpse",
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "description": "无限掠影 - 无限有趣的风景体验",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview"
+  },
+  "dependencies": {
+    "gsap": "^3.13.0",
+    "lil-gui": "^0.20.0",
+    "stats.js": "^0.17.0",
+    "three": "^0.177.0"
   },
   "devDependencies": {
     "@types/three": "^0.177.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.5"
-  },
-  "dependencies": {
-    "lil-gui": "^0.20.0",
-    "stats.js": "^0.17.0",
-    "three": "^0.177.0"
   }
 }
